@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Text Selection Enlarger",
+  "version": "1.0",
+  "description": "Enlarges text selection using a hotkey.",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"]
+    }
+  ],
+  "commands": {
+    "enlarge-selection": {
+      "suggested_key": {
+        "default": "Alt+W"
+      },
+      "description": "Enlarge the current text selection"
+    }
+  }
+}
