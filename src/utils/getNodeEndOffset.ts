@@ -10,15 +10,7 @@ export const getNodeEndOffset = (node: Node): number => {
     case Node.TEXT_NODE:
       return node.textContent?.length || 0
     default:
-      console.warn(`Unable to get end of node with type: ${node.nodeType}`)
+      console.warn(`Unable to get end of node with type: ${ node.nodeType }`)
       return 0
   }
 }
-
-/**
- * Escapes special characters in a string for use in a regular expression.
- *
- * @param {string} source - The string to escape.
- * @returns {string} - The escaped string.
- */
-export const escapeRegExp = (source: string): string => source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

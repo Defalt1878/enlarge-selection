@@ -1,23 +1,25 @@
+import { Enumerable } from '../Enumerable/Enumerable.ts'
 import { enlargers } from './enlargers'
-import { EnlargerSettings, TextRange } from './utils'
+import { EnlargerSettings } from './utils'
 
 /**
  * Expands the text selection within a range based on predefined settings.
  * @param range - The range to be expanded.
  */
 export const expandTextSelection = (range: Range) => {
-  const textNode = range.startContainer as Text
+  if (range.commonAncestorContainer.nodeType !== Node.TEXT_NODE) {
+    throw new Error('Not text node passed')
+  }
+
+  const textNode = range.commonAncestorContainer as Text
   const selectedContent = range.toString()
   const fullContent = textNode.wholeText
 
-  const appliableEnlargers = enlargers
-    .map(enlarger => tryApplyEnlarger(enlarger, selectedContent, fullContent, range))
-    .filter(enlarge => enlarge != null) as TextRange[]
-
-  const minEnlarge = appliableEnlargers.sort(textRangesComparer)[0] || {
-    start: 0,
-    end: fullContent.length,
-  }
+  const minEnlarge = Enumerable(enlargers)
+    .select(enlarger => tryApplyEnlarger(enlarger, selectedContent, fullContent, range))
+    .whereNotNull()
+    .defaultIfEmpty({ start: 0, end: fullContent.length })
+    .minBy(e => e.end - e.start)!
 
   range.setStart(textNode, minEnlarge.start)
   range.setEnd(textNode, minEnlarge.end)
@@ -50,18 +52,16 @@ const surroundWith = (
   targetStart: number,
   targetEnd: number,
 ): { start: number; end: number } | null => {
-  const startMatches = [...source.matchAll(new RegExp(matchStart, 'g'))]
-  const endMatches = [...source.matchAll(new RegExp(matchEnd, 'g'))]
+  const nearerStartMatch = Enumerable(source.matchAll(new RegExp(matchStart, 'g')))
+    .where(match => match.index + match[0].length <= targetStart)
+    .lastOrDefault()
 
-  const nearerStartMatch = startMatches.filter(match => match.index + match[0].length <= targetStart).pop()
-  const nearerEndMatch = endMatches.find(match => match.index >= targetEnd)
+  const nearerEndMatch = Enumerable(source.matchAll(new RegExp(matchEnd, 'g'))).firstOrDefault(
+    match => match.index >= targetEnd,
+  )
 
   if (nearerStartMatch && nearerEndMatch) {
     return { start: nearerStartMatch.index + nearerStartMatch[0].length, end: nearerEndMatch.index }
   }
   return null
-}
-
-const textRangesComparer = (a: TextRange, b: TextRange): number => {
-  return a.end - a.start - (b.end - b.start)
 }

@@ -1,4 +1,4 @@
-import { getNodeEndOffset } from './utils'
+import { getNodeEndOffset } from './utils/getNodeEndOffset.ts'
 import { expandTextSelection } from './textEnlargers/inlineTextEnlarger'
 
 /**

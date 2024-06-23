@@ -1,3 +1,4 @@
+import './globals'
 import { isHotkey } from 'is-hotkey'
 import { handleEnlargeSelection } from './selectionHandler'
 

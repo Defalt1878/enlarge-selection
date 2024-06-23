@@ -1,4 +1,4 @@
-import { escapeRegExp } from '../utils'
+import { escapeRegExp } from '../utils/escapeRegExp.ts'
 
 export interface TextRange {
   start: number
